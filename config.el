@@ -35,23 +35,19 @@
   (defvar org-work (concat org-directory "work.org"))
   (defvar org-inbox (concat org-directory "inbox.org"))
   (defvar org-projects (concat org-directory "projects.org"))
-  (setq org-latex-hyperref-template t)
-  (setq org-agenda-files (list org-inbox
+  (setq org-hide-emphasis-markers t
+        org-latex-hyperref-template t
+        org-agenda-files (list org-inbox
                                org-work
-                               org-projects))
-  (setq org-refile-targets '(org-agenda-files))
-
-  (setq org-todo-keyword-faces
-        '(("[·]" . "green")
-          ("[→]" . "yellow")
-          ("[/]" . (:foreground "blue" :weight bold))))
-
-  (setq org-todo-keywords
-        '((sequence "·(t!)" "→(s!)" "|" "ⓧ(d!)" "/(c@!)" "⟲(w@!)")
-          (sequence "idea(i)" "|" "ⓧ(d!)" "/(c@!)" "⟲(w@!)")))
-
-
-  (setq org-capture-templates '(("i" "Inbox" entry
+                               org-projects)
+        org-refile-targets '(org-agenda-files)
+        org-todo-keyword-faces '(("·" . "green")
+                                 ("→" . "yellow")
+                                 ("⟲" . "yellow")
+                                 ("ⓧ" . (:foreground "blue" :weight bold)))
+        org-todo-keywords '((sequence "·(t!)" "→(s!)" "|" "✓(d!)" "/(c@!)" "⟲(w@!)")
+                            (sequence "idea(i)" "|" "✓(d!)" "ⓧ(c@!)" "⟲(w@!)"))
+        org-capture-templates '(("i" "Inbox" entry
                                  (file+headline org-inbox "Inbox")
                                  "* · %i%?")
                                 ("j" "Journal" entry
@@ -62,9 +58,8 @@
                                  "* [%<%H:%M>][%^g]\n%?\n")
                                 ("l" "Literature" entry
                                  (file+headline org-inbox "Literature ")
-                                 "* ·[%^g] %i%?")))
-
-  (setq org-startup-indented 'indent
+                                 "* ·[%^g] %i%?"))
+        org-startup-indented 'indent
         org-startup-folded 'content
         org-src-tab-acts-natively t
         org-enforce-todo-dependencies t
@@ -75,9 +70,8 @@
                         ("life" . ?l)
                         ("projects" . ?p)
                         ("ttrpg" , ?g)
-                        ("thoughts", ?t)))
-
-  (setq ispell-program-name "/usr/local/bin/aspell")
+                        ("thoughts", ?t))
+        ispell-program-name "/usr/local/bin/aspell")
 
   (add-hook 'org-mode-hook 'turn-on-flyspell)
   (add-hook 'org-mode-hook 'org-indent-mode)
@@ -107,11 +101,12 @@
                      (org-agenda-start-on-weekday 1)
                      (org-agenda-start-with-log-mode '(closed))
                      (org-agenda-skip-function
-                      '(org-agenda-skip-entry-if 'notregexp "^\\*\\* ⓧ "))))
+                      '(org-agenda-skip-entry-if 'notregexp "^\\*\\* ✓ "))))
           ("v" "View"
            ((agenda ""
                     ((org-agenda-overriding-header "\nAgenda ====================")
-                     (org-agenda-span 3)
+                     (org-agenda-start-day "today")
+                     (org-agenda-span 1)
                      (org-super-agenda-groups
                       '((:name "Tasks"
                          :time-grid t
