@@ -1,6 +1,0 @@
-#+TITLE: zettelkasten
-#+ROAM_TAGS: "learning"
-#+ROAM_KEY: https://www.lesswrong.com/posts/NfdHG6oHBJ8Qxc26s/the-zettelkasten-method-1
-
-* Introduction
-A simple non-hierarchical note taking strategy. Inside the notes can contain latex and other org-mode niceties: $e^{i\pi}+1 = 0$.

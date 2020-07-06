@@ -31,10 +31,10 @@
 
 (after! org
   (setq org-directory "~/.doom.d/org/")
-  (defvar org-journal (concat org-directory "journal.org"))
-  (defvar org-work (concat org-directory "work.org"))
-  (defvar org-inbox (concat org-directory "inbox.org"))
-  (defvar org-projects (concat org-directory "projects.org"))
+  (defvar org-journal (concat org-directory "journal.gpg"))
+  (defvar org-work (concat org-directory "work.gpg"))
+  (defvar org-inbox (concat org-directory "inbox.gpg"))
+  (defvar org-projects (concat org-directory "projects.gpg"))
   (setq org-hide-emphasis-markers t
         org-latex-hyperref-template t
         org-agenda-files (list org-inbox
