@@ -1,0 +1,31 @@
+# -*- eval: (face-remap-add-relative 'default :family "CMU Serif") -*-
+#+TITLE: engrafo
+#+SUBTITLE: A Research Notebook
+#+AUTHOR: Toby Shearman
+#+EMAIL: toby@estimatingnature.com
+#+DESCRIPTION: engrafo - a research notebook
+#+EXCLUDE_TAGS: noexport
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+STARTUP: latexpreview
+#+OPTIONS: tags:t tasks:t tex:t timestamp:t toc:nil todo:t |:t
+
+#+LATEX_CLASS: amsart
+#+LATEX_CLASS_OPTIONS: [a4paper, 10pt]
+
+#+LATEX_HEADER: \usepackage{enumitem}
+#+LATEX_HEADER: \usepackage{amssymb,amsmath,amsthm}
+#+LATEX_HEADER: \usepackage{etoolbox}
+
+#+LATEX_HEADER: \setlist[itemize]{label=$\circ$}
+#+LATEX_HEADER: \makeatletter
+#+LATEX_HEADER: \patchcmd{\@sect}{\@svsec\@empty}{\@svsec\@empty\stepcounter{#1}}{}{}
+#+LATEX_HEADER: \makeatother
+
+\begin{abstract}
+This is an attempt to use and learn how to effectively use OrgMode to collect
+ideas and thoughts in journal form.  In conjuction with the agenda and todos
+this should be an effective way of managing tasks and becoming more organized
+and effective.
+\end{abstract}
+

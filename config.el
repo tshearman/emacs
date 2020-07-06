@@ -28,7 +28,192 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/.doom.d/org/")
+
+(after! org
+  (setq org-directory "~/.doom.d/org/")
+  (defvar org-journal (concat org-directory "journal.org"))
+  (defvar org-work (concat org-directory "work.org"))
+  (defvar org-inbox (concat org-directory "inbox.org"))
+  (defvar org-projects (concat org-directory "projects.org"))
+  (setq org-latex-hyperref-template t)
+  (setq org-agenda-files (list org-inbox
+                               org-work
+                               org-projects))
+  (setq org-refile-targets '(org-agenda-files))
+
+  (setq org-todo-keyword-faces
+        '(("[·]" . "green")
+          ("[→]" . "yellow")
+          ("[/]" . (:foreground "blue" :weight bold))))
+
+  (setq org-todo-keywords
+        '((sequence "·(t!)" "→(s!)" "|" "ⓧ(d!)" "/(c@!)" "⟲(w@!)")
+          (sequence "idea(i)" "|" "ⓧ(d!)" "/(c@!)" "⟲(w@!)")))
+
+
+  (setq org-capture-templates '(("i" "Inbox" entry
+                                 (file+headline org-inbox "Inbox")
+                                 "* · %i%?")
+                                ("j" "Journal" entry
+                                 (file+olp+datetree org-journal)
+                                 "* [%<%H:%M>][%^g]\n%?\n")
+                                ("w" "Work" entry
+                                 (file+olp+datetree org-work)
+                                 "* [%<%H:%M>][%^g]\n%?\n")
+                                ("l" "Literature" entry
+                                 (file+headline org-inbox "Literature ")
+                                 "* ·[%^g] %i%?")))
+
+  (setq org-startup-indented 'indent
+        org-startup-folded 'content
+        org-src-tab-acts-natively t
+        org-enforce-todo-dependencies t
+        org-log-done (quote time)
+        org-log-redeadline (quote time)
+        org-log-reschedule (quote time)
+        org-tag-alist '(("work" . ?w)
+                        ("life" . ?l)
+                        ("projects" . ?p)
+                        ("ttrpg" , ?g)
+                        ("thoughts", ?t)))
+
+  (setq ispell-program-name "/usr/local/bin/aspell")
+
+  (add-hook 'org-mode-hook 'turn-on-flyspell)
+  (add-hook 'org-mode-hook 'org-indent-mode)
+  (add-hook 'org-mode-hook 'turn-off-auto-fill)
+  (add-hook 'org-mode-hook 'org-indent-mode)
+  (add-hook 'org-mode-hook 'visual-line-mode)
+  (global-set-key (kbd "C-c a") 'org-agenda)
+  (global-set-key (kbd "C-c x") 'org-capture))
+
+(use-package org-super-agenda
+  :after org-agenda
+  :init
+  (setq org-agenda-skip-scheduled-if-done t
+        org-agenda-skip-deadline-if-done t
+        org-agenda-include-deadlines t
+        org-agenda-skip-deadline-prewarning-if-scheduled t
+        org-agenda-skip-scheduled-if-deadline-is-shown t
+        org-agenda-block-separator nil
+        org-agenda-compact-blocks t
+        org-agenda-start-day "-1d"
+        org-agenda-start-on-weekday nil
+        org-agenda-custom-commands
+        '(("r" "Review"
+           agenda ""
+                    ((org-agenda-start-day "-13d")
+                     (org-agenda-span 14)
+                     (org-agenda-start-on-weekday 1)
+                     (org-agenda-start-with-log-mode '(closed))
+                     (org-agenda-skip-function
+                      '(org-agenda-skip-entry-if 'notregexp "^\\*\\* ⓧ "))))
+          ("v" "View"
+           ((agenda ""
+                    ((org-agenda-overriding-header "\nAgenda ====================")
+                     (org-agenda-span 3)
+                     (org-super-agenda-groups
+                      '((:name "Tasks"
+                         :time-grid t
+                         :todo "→")
+                        (:name "Today"
+                         :time-grid t
+                         :date today
+                         :scheduled today
+                         :order 1)
+                        (:name "Waiting"
+                         :time-grid t
+                         :todo "⟲")
+                        (:name "Important"
+                         :priority "A")))))
+            (alltodo ""
+                     ((org-agenda-overriding-header "\n\nTasks ====================")
+                      (org-super-agenda-groups
+                       '((:name "Important"
+                          :priority "A"
+                          :order 6)
+                         (:name "Due Today"
+                          :deadline today
+                          :order 2)
+                         (:name "Due Soon"
+                          :deadline future
+                          :order 8)
+                         (:name "Overdue"
+                          :deadline past
+                          :order 7)
+                         (:name "Projects"
+                          :tag "project"
+                          :order 14)
+                         (:name "Research"
+                          :tag "research"
+                          :order 15)
+                         (:name "To Read"
+                          :tag "literature"
+                          :order 30)
+                         (:name "Waiting"
+                          :todo "⟲"
+                          :order 20)
+                         (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
+  :config
+  (org-super-agenda-mode))
+
+(use-package org-roam
+  :after org-super-agenda
+  :hook
+  (after-init . org-roam-mode)
+  :custom
+  (org-roam-directory (concat org-directory "roam/"))
+  (org-roam-index-file (concat org-roam-directory "index.org"))
+  :bind
+  (:map org-roam-mode-map
+   (("C-c n l" . org-roam)
+    ("C-c n f" . org-roam-find-file)
+    ("C-c n j" . org-roam-jump-to-index)
+    ("C-c n b" . org-roam-switch-to-buffer)
+    ("C-c n g" . org-roam-graph))
+   :map org-mode-map
+   (("C-c n i" . org-roam-insert)))
+  :config
+  (org-roam-mode))
+
+(use-package org-journal
+  :bind
+  ("C-c n j" . org-journal-new-entry)
+  :custom
+  (org-journal-dir (concat org-directory "journal"))
+  (org-journal-date-prefix "#+TITLE: ")
+  (org-journal-file-format "%Y-%m-%d.org")
+  (org-journal-date-format "%A, %d %B %Y"))
+(setq org-journal-enable-agenda-integration t)
+
+(with-eval-after-load 'ox-latex
+  (add-to-list 'org-latex-classes
+               '("amsart" "\\documentclass[10pt]{amsart}"
+                 ("\\section*{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+  (add-to-list 'org-latex-classes
+               '("amsjournal" "\\documentclass[10pt]{amsbook}"
+                 ("\\chapter*{%s}" . "\\chapter*{%s}")
+                 ("\\section*{%s}" . "\\section*{%s}")
+                 ("\\subsection*{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection*{%s}" . "\\subsubsection*{%s}")))
+  
+  (setq org-latex-default-packages-alist
+        '(("AUTO" "inputenc"  t ("pdflatex"))
+          ("T1"   "fontenc"   t ("pdflatex"))
+          (""     "graphicx"  t)
+          (""     "grffile"   t)
+          (""     "longtable" nil)
+          (""     "wrapfig"   nil)
+          (""     "rotating"  nil)
+          ("normalem" "ulem"  t)
+          (""     "amsmath"   t)
+          (""     "textcomp"  t)
+          (""     "amssymb"   t)
+          (""     "capt-of"   nil))))
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -54,12 +239,7 @@
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
 
-(setq org-default-notes-file concat(org-directory "notes.org"))
-(global-set-key (kbd "C-c a") 'org-agenda)
-(global-set-key (kbd "C-c x") 'org-capture)
-
-
 ;; Set default font faces for Org mode
-(add-hook 'org-mode-hook (lambda ()
-                            (setq buffer-face-mode-face '(:family "CMU Serif"))
-                            (buffer-face-mode)))
+;; (add-hook 'org-mode-hook (lambda ()
+;;                             (setq buffer-face-mode-face '(:family "CMU Serif"))
+;;                             (buffer-face-mode)))

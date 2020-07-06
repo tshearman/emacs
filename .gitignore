@@ -48,3 +48,6 @@ flycheck_*.el
 /network-security.data
 
 .DS_Store
+
+/org/*.pdf
+/org/*.tex
