@@ -19,7 +19,9 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "Fira Code Light" :size 16))
+(setq doom-font (font-spec :family "Fira Code Light" :size 16)
+      doom-variable-pitch-font (font-spec :family "CMU Serif" :size 16))
+
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -29,17 +31,17 @@
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 
+(setq org-directory "~/.doom.d/org/")
 (after! org
   (setq org-directory "~/.doom.d/org/")
-  (defvar org-journal (concat org-directory "journal.gpg"))
-  (defvar org-work (concat org-directory "work.gpg"))
-  (defvar org-inbox (concat org-directory "inbox.gpg"))
-  (defvar org-projects (concat org-directory "projects.gpg"))
+  (defvar org-work-file (concat org-directory "work.org.gpg"))
+  (defvar org-inbox-file (concat org-directory "inbox.org.gpg"))
+  (defvar org-projects-file (concat org-directory "projects.org.gpg"))
   (setq org-hide-emphasis-markers t
         org-latex-hyperref-template t
-        org-agenda-files (list org-inbox
-                               org-work
-                               org-projects)
+        org-agenda-files (list org-inbox-file
+                               org-work-file
+                               org-projects-file)
         org-refile-targets '(org-agenda-files)
         org-todo-keyword-faces '(("·" . "green")
                                  ("→" . "yellow")
@@ -48,16 +50,13 @@
         org-todo-keywords '((sequence "·(t!)" "→(s!)" "|" "✓(d!)" "/(c@!)" "⟲(w@!)")
                             (sequence "idea(i)" "|" "✓(d!)" "ⓧ(c@!)" "⟲(w@!)"))
         org-capture-templates '(("i" "Inbox" entry
-                                 (file+headline org-inbox "Inbox")
+                                 (file+headline org-inbox-file "Inbox")
                                  "* · %i%?")
-                                ("j" "Journal" entry
-                                 (file+olp+datetree org-journal)
-                                 "* [%<%H:%M>][%^g]\n%?\n")
                                 ("w" "Work" entry
-                                 (file+olp+datetree org-work)
+                                 (file+olp+datetree org-work-file)
                                  "* [%<%H:%M>][%^g]\n%?\n")
                                 ("l" "Literature" entry
-                                 (file+headline org-inbox "Literature ")
+                                 (file+headline org-inbox-file "Literature ")
                                  "* ·[%^g] %i%?"))
         org-startup-indented 'indent
         org-startup-folded 'content
@@ -154,11 +153,12 @@
 
 (use-package org-roam
   :after org-super-agenda
+  :init
+  (setq org-roam-encrypt-files t
+        org-roam-directory (concat org-directory "roam/")
+        org-roam-index-file (concat org-roam-directory "index.org.gpg"))
   :hook
   (after-init . org-roam-mode)
-  :custom
-  (org-roam-directory (concat org-directory "roam/"))
-  (org-roam-index-file (concat org-roam-directory "index.org"))
   :bind
   (:map org-roam-mode-map
    (("C-c n l" . org-roam)
@@ -172,14 +172,27 @@
   (org-roam-mode))
 
 (use-package org-journal
+  :after org-roam
   :bind
   ("C-c n j" . org-journal-new-entry)
-  :custom
-  (org-journal-dir (concat org-directory "journal"))
-  (org-journal-date-prefix "#+TITLE: ")
-  (org-journal-file-format "%Y-%m-%d.org")
-  (org-journal-date-format "%A, %d %B %Y"))
-(setq org-journal-enable-agenda-integration t)
+  :init
+  (setq org-journal-enable-agenda-integration t
+        org-journal-dir org-roam-directory
+        org-journal-date-prefix "#+TITLE: "
+        org-journal-file-format "%Y-%m-%d.org.gpg"
+        org-journal-date-format "%A, %d %B %Y"))
+
+(use-package deft
+      :after org
+      :bind
+      ("C-c n d" . deft)
+      :custom
+      (deft-auto-save-interval 0)
+      (deft-recursive t)
+      (deft-use-filter-string-for-filename t)
+      (deft-default-extension "org.gpg")
+      (deft-extensions '("org" "org.gpg" "gpg"))
+      (deft-directory (concat org-directory "roam")))
 
 (with-eval-after-load 'ox-latex
   (add-to-list 'org-latex-classes
@@ -233,8 +246,3 @@
 ;;
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
-
-;; Set default font faces for Org mode
-;; (add-hook 'org-mode-hook (lambda ()
-;;                             (setq buffer-face-mode-face '(:family "CMU Serif"))
-;;                             (buffer-face-mode)))
