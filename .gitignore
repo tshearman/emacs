@@ -52,3 +52,4 @@ flycheck_*.el
 /org/*.pdf
 /org/*.tex
 /org/work.gpg
+org/roam/org-roam.db
