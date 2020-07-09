@@ -53,3 +53,22 @@ flycheck_*.el
 /org/*.tex
 /org/work.gpg
 org/roam/org-roam.db
+*.orgids
+*.auctex-auto*
+
+# LaTeX
+*.aux
+*.tex
+*.bbl
+*.fls
+*.fdb_latexmk
+*.blg
+*.log
+*.out
+*.pdf
+*.run.xml
+*.toc
+*.odt
+
+# Bibtex file (needs to be in this location)
+references/bazaar.bib

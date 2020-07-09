@@ -7,7 +7,8 @@
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Toby Shearman"
-      user-mail-address "toby@estimatingnature.com")
+      user-mail-address "toby@estimatingnature.com"
+      epa-file-encrypt-to '("toby@estimatingnature.com"))
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
@@ -156,7 +157,16 @@
   :init
   (setq org-roam-encrypt-files t
         org-roam-directory (concat org-directory "roam/")
-        org-roam-index-file (concat org-roam-directory "index.org.gpg"))
+        org-roam-index-file (concat org-roam-directory "index.org.gpg")
+        org-roam-capture-templates '(("d" "default" plain (function org-roam-capture--get-point)
+                                      "%?"
+                                      :file-name "%<%Y%m%d%H%M%S>-${slug}"
+                                      :head "#+title: ${title}\n"
+                                      :unnarrowed t)
+                                     ("l" "latex" plain (function org-roam-capture--get-point)
+                                      "\n- tags :: %?\n\n\n\n\nbibliographystyle:humannat\nbibliography:../../references/bazaar"
+                                      :file-name "%<%Y%m%d%H%M%S>-${slug}"
+                                      :head "#+title: ${title}\n")))
   :hook
   (after-init . org-roam-mode)
   :bind
@@ -194,6 +204,31 @@
       (deft-extensions '("org" "org.gpg" "gpg"))
       (deft-directory (concat org-directory "roam")))
 
+(defun my/org-ref-open-pdf-at-point ()
+  "Open the pdf for bibtex key under point if it exists."
+  (interactive)
+  (let* ((results (org-ref-get-bibtex-key-and-file))
+         (key (car results))
+	 (pdf-file (car (bibtex-completion-find-pdf key))))
+    (if (file-exists-p pdf-file)
+	(org-open-file pdf-file)
+      (message "No PDF found for %s" key))))
+
+(use-package reftex
+  :commands turn-on-reftex
+  :init
+  (setq reftex-default-bibliography '("~/.doom.d/references/bazaar.bib")
+        reftex-plug-intoAUCTex t))
+
+(use-package org-ref
+  :after org
+  :init
+  (setq org-ref-bibliography-notes '("~/.doom.d/references/notes.org")
+        org-ref-default-bibliography '("~/.doom.d/references/bazaar.bib")
+        bibtex-completion-bibliography '("~/.doom.d/references/bazaar.bib")
+        bibtex-completion-pdf-field "file"
+        org-ref-open-pdf-function 'my/org-ref-open-pdf-at-point))
+
 (with-eval-after-load 'ox-latex
   (add-to-list 'org-latex-classes
                '("amsart" "\\documentclass[10pt]{amsart}"
@@ -212,6 +247,7 @@
   (setq org-latex-default-packages-alist
         '(("AUTO" "inputenc"  t ("pdflatex"))
           ("T1"   "fontenc"   t ("pdflatex"))
+          (""     "hyperref"  t)
           (""     "graphicx"  t)
           (""     "grffile"   t)
           (""     "longtable" nil)
@@ -219,9 +255,13 @@
           (""     "rotating"  nil)
           ("normalem" "ulem"  t)
           (""     "amsmath"   t)
+          (""     "natbib"    t)
           (""     "textcomp"  t)
           (""     "amssymb"   t)
           (""     "capt-of"   nil))))
+
+(setq org-latex-pdf-process
+    '("latexmk -pdflatex='pdflatex -interaction nonstopmode' -pdf -bibtex -f %f"))
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -229,6 +269,8 @@
 
 ;;syntax highlight code blocks
 (setq org-src-fontify-natively t)
+
+
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
