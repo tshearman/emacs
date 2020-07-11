@@ -34,15 +34,14 @@
 
 (setq org-directory "~/.doom.d/org/")
 (after! org
-  (setq org-directory "~/.doom.d/org/")
-  (defvar org-work-file (concat org-directory "work.org.gpg"))
+  (defvar org-work-file (concat org-directory "work/work.org.gpg"))
+  (defvar org-work-inbox (concat org-directory "work/inbox.org.gpg"))
+  (defvar org-work-directory (concat org-directory "work/"))
   (defvar org-inbox-file (concat org-directory "inbox.org.gpg"))
   (defvar org-projects-file (concat org-directory "projects.org.gpg"))
   (setq org-hide-emphasis-markers t
         org-latex-hyperref-template t
-        org-agenda-files (list org-inbox-file
-                               org-work-file
-                               org-projects-file)
+        org-agenda-files (append (file-expand-wildcards "~/.doom.d/org/*.org.gpg") (directory-files-recursively org-work-directory "\\.org.gpg$"))
         org-refile-targets '(org-agenda-files)
         org-todo-keyword-faces '(("·" . "green")
                                  ("→" . "yellow")
@@ -50,15 +49,18 @@
                                  ("ⓧ" . (:foreground "blue" :weight bold)))
         org-todo-keywords '((sequence "·(t!)" "→(s!)" "|" "✓(d!)" "/(c@!)" "⟲(w@!)")
                             (sequence "idea(i)" "|" "✓(d!)" "ⓧ(c@!)" "⟲(w@!)"))
-        org-capture-templates '(("i" "Inbox" entry
-                                 (file+headline org-inbox-file "Inbox")
+        org-capture-templates '(("i" "Inbox" entry (file+headline org-inbox-file "Inbox")
                                  "* · %i%?")
-                                ("w" "Work" entry
-                                 (file+olp+datetree org-work-file)
-                                 "* [%<%H:%M>][%^g]\n%?\n")
-                                ("l" "Literature" entry
-                                 (file+headline org-inbox-file "Literature ")
-                                 "* ·[%^g] %i%?"))
+                                ("l" "Literature" entry (file+headline org-inbox-file "Literature ")
+                                 "* ·[%^g] %i%?")
+
+                                ("w" "Work")
+                                ("wi" "Work Inbox" entry (file+headline org-work-inbox "Inbox")
+                                 "* · %i%? :work:")
+
+                                ("p" "Projects")
+                                ("pa" "Attribution" entry (file+headline "~/.doom.d/org/work/projects/attribution.org.gpg" "Tasks")
+                                 "* · %i%? :work:attribution:"))
         org-startup-indented 'indent
         org-startup-folded 'content
         org-src-tab-acts-natively t
@@ -67,10 +69,12 @@
         org-log-redeadline (quote time)
         org-log-reschedule (quote time)
         org-tag-alist '(("work" . ?w)
+                        ("weekly" . ?W)
                         ("life" . ?l)
                         ("projects" . ?p)
-                        ("ttrpg" , ?g)
-                        ("thoughts", ?t))
+                        ("ttrpg" . ?g)
+                        ("thoughts" . ?t)
+                        ("attribution" . ?a))
         ispell-program-name "/usr/local/bin/aspell")
 
   (add-hook 'org-mode-hook 'turn-on-flyspell)
@@ -95,15 +99,14 @@
         org-agenda-start-on-weekday nil
         org-agenda-custom-commands
         '(("r" "Review"
-           agenda ""
-                    ((org-agenda-start-day "-13d")
-                     (org-agenda-span 14)
-                     (org-agenda-start-on-weekday 1)
-                     (org-agenda-start-with-log-mode '(closed))
-                     (org-agenda-skip-function
-                      '(org-agenda-skip-entry-if 'notregexp "^\\*\\* ✓ "))))
+           (agenda ""
+                   ((org-agenda-start-day "-14d")
+                    (org-agenda-span 16)
+                    (org-agenda-start-on-weekday 1)
+                    (org-agenda-archives-mode t)
+                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexp "*✓*")))))
           ("v" "View"
-           ((agenda ""
+           (agenda ""
                     ((org-agenda-overriding-header "\nAgenda ====================")
                      (org-agenda-start-day "today")
                      (org-agenda-span 1)
@@ -120,28 +123,28 @@
                          :time-grid t
                          :todo "⟲")
                         (:name "Important"
-                         :priority "A")))))
-            (alltodo ""
-                     ((org-agenda-overriding-header "\n\nTasks ====================")
-                      (org-super-agenda-groups
-                       '((:name "Important"
-                          :priority "A"
-                          :order 6)
-                         (:name "Due Today"
-                          :deadline today
-                          :order 2)
-                         (:name "Due Soon"
-                          :deadline future
-                          :order 8)
-                         (:name "Overdue"
-                          :deadline past
-                          :order 7)
-                         (:name "Projects"
-                          :tag "project"
-                          :order 14)
-                         (:name "Research"
-                          :tag "research"
-                          :order 15)
+                         :priority "A"))))))
+          (alltodo ""
+                   ((org-agenda-overriding-header "\n\nTasks ====================")
+                    ((org-super-agenda-groups
+                      '((:name "Important"
+                         :priority "A"
+                         :order 6)
+                        (:name "Due Today"
+                         :deadline today
+                         :order 2)
+                        (:name "Due Soon"
+                         :deadline future
+                         :order 8)
+                        (:name "Overdue"
+                         :deadline past
+                         :order 7)
+                        (:name "Projects"
+                         :tag "project"
+                         :order 14)
+                        (:name "Research"
+                         :tag "research"
+                         :(order 15)
                          (:name "To Read"
                           :tag "literature"
                           :order 30)

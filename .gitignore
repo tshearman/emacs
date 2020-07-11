@@ -51,10 +51,12 @@ flycheck_*.el
 
 /org/*.pdf
 /org/*.tex
-/org/work.gpg
 org/roam/org-roam.db
 *.orgids
 *.auctex-auto*
+
+# Keep work stuff @ work
+/org/work/*
 
 # LaTeX
 *.aux
@@ -70,5 +72,5 @@ org/roam/org-roam.db
 *.toc
 *.odt
 
-# Bibtex file (needs to be in this location)
+# Bibtex file (needs to be in this location, machine local)
 references/bazaar.bib
