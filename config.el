@@ -98,61 +98,61 @@
         org-agenda-start-day "-1d"
         org-agenda-start-on-weekday nil
         org-agenda-custom-commands
-        '(
-          ("r" "Review"
-           (agenda ""
-                   ((org-agenda-start-day "-14d")
-                    (org-agenda-span 16)
-                    (org-agenda-start-on-weekday 1)
-                    (org-agenda-archives-mode t)
-                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexp "*✓*")))))
+        '(("r" "Review"
+           agenda ""
+                    ((org-agenda-start-day "-13d")
+                     (org-agenda-span 14)
+                     (org-agenda-start-on-weekday 1)
+                     (org-agenda-start-with-log-mode '(closed))
+                     (org-agenda-skip-function
+                      '(org-agenda-skip-entry-if 'notregexp "^\\*\\* ✓ "))))
           ("v" "View"
-           (agenda ""
-                   ((org-agenda-overriding-header "\nAgenda ====================")
-                    (org-agenda-start-day "today")
-                    (org-agenda-span 1)
-                    (org-super-agenda-groups
-                     '((:name "Tasks"
-                        :time-grid t
-                        :todo "→")
-                       (:name "Today"
-                        :time-grid t
-                        :date today
-                        :scheduled today
-                        :order 1)
-                       (:name "Waiting"
-                        :time-grid t
-                        :todo "⟲")
-                       (:name "Important"
-                        :priority "A")))))
-           (alltodo ""
-                    ((org-agenda-overriding-header "\n\nTasks ====================")
+           ((agenda ""
+                    ((org-agenda-overriding-header "\nAgenda ====================")
+                     (org-agenda-start-day "today")
+                     (org-agenda-span 1)
                      (org-super-agenda-groups
-                      '((:name "Important"
-                         :priority "A"
-                         :order 6)
-                        (:name "Due Today"
-                         :deadline today
-                         :order 2)
-                        (:name "Due Soon"
-                         :deadline future
-                         :order 8)
-                        (:name "Overdue"
-                         :deadline past
-                         :order 7)
-                        (:name "Projects"
-                         :tag "project"
-                         :order 14)
-                        (:name "Research"
-                         :tag "research"
-                         :order 15)
+                      '((:name "Tasks"
+                         :time-grid t
+                         :todo "→")
+                        (:name "Today"
+                         :time-grid t
+                         :date today
+                         :scheduled today
+                         :order 1)
+                        (:name "Waiting"
+                         :time-grid t
+                         :todo "⟲")
+                        (:name "Important"
+                         :priority "A")))))
+            (alltodo ""
+                     ((org-agenda-overriding-header "\n\nTasks ====================")
+                      (org-super-agenda-groups
+                       '((:name "Important"
+                          :priority "A"
+                          :order 6)
+                         (:name "Due Today"
+                          :deadline today
+                          :order 2)
+                         (:name "Due Soon"
+                          :deadline future
+                          :order 8)
+                         (:name "Overdue"
+                          :deadline past
+                          :order 7)
+                         (:name "Projects"
+                          :tag "project"
+                          :order 14)
+                         (:name "Research"
+                          :tag "research"
+                          :order 15)
                          (:name "To Read"
                           :tag "literature"
                           :order 30)
                          (:name "Waiting"
                           :todo "⟲"
                           :order 20)
-                         (:discard (:tag ("Chore" "Routine" "Daily"))))))))))
+                         (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
   :config
   (org-super-agenda-mode))
 
