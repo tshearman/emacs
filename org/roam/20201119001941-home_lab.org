@@ -5,11 +5,13 @@
 * Introduction
 
 * Problems
-** Modeling and Computation
+1. Modeling and Computation
+   - crypto and forex trading
+   - sports predictions and betting
+2. Data Security
+3. Monitoring
+   - collection of physical sensors, temperature, etc., with alerting
 
-** Data Security
-
-** Monitoring
 
 * Systems
 ** Learning System
@@ -43,6 +45,7 @@ Read only replica of the postgres database on "Data Server"?
 A reliable data server allows us to store our data and models with confidence.
 
 *** Design
+
 *** Specs
 - CPU: Intel i7-8700K, 6 cores/12 threads @ 4.7GHz
 - MEMORY: 32 - 64GB
@@ -77,8 +80,6 @@ If we plan on doing any medium-to-long frequency trading, a high availability cl
 
 OpenFaaS can solve many interesting challenges. Some possibilities:
 1. Model Ingestion and deployment?
-
-
 
 ** Common Tooling and Software
 1. docker
