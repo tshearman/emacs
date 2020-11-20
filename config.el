@@ -72,6 +72,7 @@
                         ("weekly" . ?W)
                         ("life" . ?l)
                         ("projects" . ?p)
+                        ("literature" . ?l)
                         ("ttrpg" . ?g)
                         ("thoughts" . ?t)
                         ("attribution" . ?a))
@@ -100,9 +101,9 @@
         org-agenda-custom-commands
         '(("r" "Review"
            agenda ""
-                    ((org-agenda-start-day "-13d")
+                    ((org-agenda-start-day "-7d")
                      (org-agenda-span 14)
-                     (org-agenda-start-on-weekday 1)
+                     (org-agenda-start-on-weekday 0)
                      (org-agenda-start-with-log-mode '(closed))
                      (org-agenda-skip-function
                       '(org-agenda-skip-entry-if 'notregexp "^\\*\\* ✓ "))))
