@@ -1,0 +1,67 @@
+#+title: home-lab
+
+- tags :: [[file:20200708230241-computing.org.gpg][computing]]
+
+* Introduction
+
+* Problems
+** Modeling and Computation
+
+** Data Security
+
+** Monitoring
+
+* Systems
+** Learning System
+To solve modern learning problems, a powerful CPU and GPU computing solution is necessary.
+
+*** Design
+
+*** Tooling and Software
+1. Jupyter Hub
+2. Tensorflow
+3. Programming Languages
+   1. Python
+   2. Haskell
+   3. Scala
+   4. Go, Rust?
+
+Spark likely is unnecessary, since the learning system is a single machine? Do we want to write our models in Spark anyways so that we can port them easily to larger, distributed systems?
+
+Read only replica of the postgres database on "Data Server"?
+
+** Data Server
+A reliable data server allows us to store our data and models with confidence.
+
+*** Design
+
+*** Tooling and Software
+2. quota
+
+** High-Availability Cluster
+Our high availability cluster ensures that we can reliably serve our solutions. Moreover, this represents a learning exercise. The system comprises a collection of Raspberry Pi nodes.
+
+If we plan on doing any medium-to-long frequency trading, a high availability cluster will be an absolute necessity.
+
+*** Design
+
+*** Tooling and Software
+1. Kubernetes
+2. High-availability PostgreSql
+3. OpenFaaS
+4. Grafana for monitoring and alerting
+5. Airflow
+
+OpenFaaS can solve many interesting challenges. Some possibilities:
+1. Model Ingestion and deployment?
+
+
+
+** Common Tooling and Software
+1. docker
+2. rsync
+3. rsnapshot
+4. postgresql
+
+bibliographystyle:humannat
+bibliography:../../references/bazaar
