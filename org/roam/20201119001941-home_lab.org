@@ -17,6 +17,15 @@ To solve modern learning problems, a powerful CPU and GPU computing solution is 
 
 *** Design
 
+*** Specs
+To be determined...
+- CPU: ???
+- MEMORY: 128 - 192GB
+- GPU: 2x 1080ti (22GB vmemory)
+- STORAGE:
+  - 1TB nvme (working storage)
+  - SSD raid (not sure the size)
+
 *** Tooling and Software
 1. Jupyter Hub
 2. Tensorflow
@@ -34,9 +43,16 @@ Read only replica of the postgres database on "Data Server"?
 A reliable data server allows us to store our data and models with confidence.
 
 *** Design
-
+*** Specs
+- CPU: Intel i7-8700K, 6 cores/12 threads @ 4.7GHz
+- MEMORY: 32 - 64GB
+- GPU: None
+- STORAGE: 6x4TB,
+  - filesystem?
+  - volume manager?
 *** Tooling and Software
 2. quota
+
 
 ** High-Availability Cluster
 Our high availability cluster ensures that we can reliably serve our solutions. Moreover, this represents a learning exercise. The system comprises a collection of Raspberry Pi nodes.
@@ -44,6 +60,13 @@ Our high availability cluster ensures that we can reliably serve our solutions. 
 If we plan on doing any medium-to-long frequency trading, a high availability cluster will be an absolute necessity.
 
 *** Design
+
+*** Specs
+8xRPi4
+- CPU: 8x4 x 1.5GHz
+- MEMORY: 8x4GB
+- GPU: None
+- STORAGE: 8x(32GB SDCard + 32GB USB-3)
 
 *** Tooling and Software
 1. Kubernetes
