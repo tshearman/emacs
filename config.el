@@ -7,7 +7,8 @@
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Toby Shearman"
-      user-mail-address "toby@estimatingnature.com")
+      user-mail-address "toby@estimatingnature.com"
+      epa-file-encrypt-to '("toby@estimatingnature.com"))
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
@@ -19,7 +20,9 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "Fira Code Light" :size 16))
+(setq doom-font (font-spec :family "Fira Code Light" :size 16)
+      doom-variable-pitch-font (font-spec :family "CMU Serif" :size 16))
+
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -29,17 +32,16 @@
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 
+(setq org-directory "~/.doom.d/org/")
 (after! org
-  (setq org-directory "~/.doom.d/org/")
-  (defvar org-journal (concat org-directory "journal.org"))
-  (defvar org-work (concat org-directory "work.org"))
-  (defvar org-inbox (concat org-directory "inbox.org"))
-  (defvar org-projects (concat org-directory "projects.org"))
+  (defvar org-work-file (concat org-directory "work/work.org.gpg"))
+  (defvar org-work-inbox (concat org-directory "work/inbox.org.gpg"))
+  (defvar org-work-directory (concat org-directory "work/"))
+  (defvar org-inbox-file (concat org-directory "inbox.org.gpg"))
+  (defvar org-projects-file (concat org-directory "projects.org.gpg"))
   (setq org-hide-emphasis-markers t
         org-latex-hyperref-template t
-        org-agenda-files (list org-inbox
-                               org-work
-                               org-projects)
+        org-agenda-files (append (file-expand-wildcards "~/.doom.d/org/*.org.gpg") (directory-files-recursively org-work-directory "\\.org.gpg$"))
         org-refile-targets '(org-agenda-files)
         org-todo-keyword-faces '(("·" . "green")
                                  ("→" . "yellow")
@@ -47,18 +49,18 @@
                                  ("ⓧ" . (:foreground "blue" :weight bold)))
         org-todo-keywords '((sequence "·(t!)" "→(s!)" "|" "✓(d!)" "/(c@!)" "⟲(w@!)")
                             (sequence "idea(i)" "|" "✓(d!)" "ⓧ(c@!)" "⟲(w@!)"))
-        org-capture-templates '(("i" "Inbox" entry
-                                 (file+headline org-inbox "Inbox")
+        org-capture-templates '(("i" "Inbox" entry (file+headline org-inbox-file "Inbox")
                                  "* · %i%?")
-                                ("j" "Journal" entry
-                                 (file+olp+datetree org-journal)
-                                 "* [%<%H:%M>][%^g]\n%?\n")
-                                ("w" "Work" entry
-                                 (file+olp+datetree org-work)
-                                 "* [%<%H:%M>][%^g]\n%?\n")
-                                ("l" "Literature" entry
-                                 (file+headline org-inbox "Literature ")
-                                 "* ·[%^g] %i%?"))
+                                ("l" "Literature" entry (file+headline org-inbox-file "Literature ")
+                                 "* ·[%^g] %i%?")
+
+                                ("w" "Work")
+                                ("wi" "Work Inbox" entry (file+headline org-work-inbox "Inbox")
+                                 "* · %i%? :work:")
+
+                                ("p" "Projects")
+                                ("pa" "Attribution" entry (file+headline "~/.doom.d/org/work/projects/attribution.org.gpg" "Tasks")
+                                 "* · %i%? :work:attribution:"))
         org-startup-indented 'indent
         org-startup-folded 'content
         org-src-tab-acts-natively t
@@ -67,10 +69,13 @@
         org-log-redeadline (quote time)
         org-log-reschedule (quote time)
         org-tag-alist '(("work" . ?w)
+                        ("weekly" . ?W)
                         ("life" . ?l)
                         ("projects" . ?p)
-                        ("ttrpg" , ?g)
-                        ("thoughts", ?t))
+                        ("literature" . ?l)
+                        ("ttrpg" . ?g)
+                        ("thoughts" . ?t)
+                        ("attribution" . ?a))
         ispell-program-name "/usr/local/bin/aspell")
 
   (add-hook 'org-mode-hook 'turn-on-flyspell)
@@ -96,9 +101,9 @@
         org-agenda-custom-commands
         '(("r" "Review"
            agenda ""
-                    ((org-agenda-start-day "-13d")
+                    ((org-agenda-start-day "-7d")
                      (org-agenda-span 14)
-                     (org-agenda-start-on-weekday 1)
+                     (org-agenda-start-on-weekday 0)
                      (org-agenda-start-with-log-mode '(closed))
                      (org-agenda-skip-function
                       '(org-agenda-skip-entry-if 'notregexp "^\\*\\* ✓ "))))
@@ -154,11 +159,21 @@
 
 (use-package org-roam
   :after org-super-agenda
+  :init
+  (setq org-roam-encrypt-files t
+        org-roam-directory (concat org-directory "roam/")
+        org-roam-index-file (concat org-roam-directory "index.org.gpg")
+        org-roam-capture-templates '(("d" "default" plain (function org-roam-capture--get-point)
+                                      "%?"
+                                      :file-name "%<%Y%m%d%H%M%S>-${slug}"
+                                      :head "#+title: ${title}\n"
+                                      :unnarrowed t)
+                                     ("l" "latex" plain (function org-roam-capture--get-point)
+                                      "\n- tags :: %?\n\n\n\n\nbibliographystyle:humannat\nbibliography:../../references/bazaar"
+                                      :file-name "%<%Y%m%d%H%M%S>-${slug}"
+                                      :head "#+title: ${title}\n")))
   :hook
   (after-init . org-roam-mode)
-  :custom
-  (org-roam-directory (concat org-directory "roam/"))
-  (org-roam-index-file (concat org-roam-directory "index.org"))
   :bind
   (:map org-roam-mode-map
    (("C-c n l" . org-roam)
@@ -172,14 +187,52 @@
   (org-roam-mode))
 
 (use-package org-journal
+  :after org-roam
   :bind
   ("C-c n j" . org-journal-new-entry)
-  :custom
-  (org-journal-dir (concat org-directory "journal"))
-  (org-journal-date-prefix "#+TITLE: ")
-  (org-journal-file-format "%Y-%m-%d.org")
-  (org-journal-date-format "%A, %d %B %Y"))
-(setq org-journal-enable-agenda-integration t)
+  :init
+  (setq org-journal-enable-agenda-integration t
+        org-journal-dir org-roam-directory
+        org-journal-date-prefix "#+TITLE: "
+        org-journal-file-format "%Y-%m-%d.org.gpg"
+        org-journal-date-format "%A, %d %B %Y"))
+
+(use-package deft
+      :after org
+      :bind
+      ("C-c n d" . deft)
+      :custom
+      (deft-auto-save-interval 0)
+      (deft-recursive t)
+      (deft-use-filter-string-for-filename t)
+      (deft-default-extension "org.gpg")
+      (deft-extensions '("org" "org.gpg" "gpg"))
+      (deft-directory (concat org-directory "roam")))
+
+(defun my/org-ref-open-pdf-at-point ()
+  "Open the pdf for bibtex key under point if it exists."
+  (interactive)
+  (let* ((results (org-ref-get-bibtex-key-and-file))
+         (key (car results))
+	 (pdf-file (car (bibtex-completion-find-pdf key))))
+    (if (file-exists-p pdf-file)
+	(org-open-file pdf-file)
+      (message "No PDF found for %s" key))))
+
+(use-package reftex
+  :commands turn-on-reftex
+  :init
+  (setq reftex-default-bibliography '("~/.doom.d/references/bazaar.bib")
+        reftex-plug-intoAUCTex t))
+
+(use-package org-ref
+  :after org
+  :init
+  (setq org-ref-bibliography-notes '("~/.doom.d/references/notes.org")
+        org-ref-default-bibliography '("~/.doom.d/references/bazaar.bib")
+        bibtex-completion-bibliography '("~/.doom.d/references/bazaar.bib")
+        bibtex-completion-pdf-field "file"
+        org-ref-open-pdf-function 'my/org-ref-open-pdf-at-point))
 
 (with-eval-after-load 'ox-latex
   (add-to-list 'org-latex-classes
@@ -199,6 +252,7 @@
   (setq org-latex-default-packages-alist
         '(("AUTO" "inputenc"  t ("pdflatex"))
           ("T1"   "fontenc"   t ("pdflatex"))
+          (""     "hyperref"  t)
           (""     "graphicx"  t)
           (""     "grffile"   t)
           (""     "longtable" nil)
@@ -206,9 +260,13 @@
           (""     "rotating"  nil)
           ("normalem" "ulem"  t)
           (""     "amsmath"   t)
+          (""     "natbib"    t)
           (""     "textcomp"  t)
           (""     "amssymb"   t)
           (""     "capt-of"   nil))))
+
+(setq org-latex-pdf-process
+    '("latexmk -pdflatex='pdflatex -interaction nonstopmode' -pdf -bibtex -f %f"))
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -216,6 +274,8 @@
 
 ;;syntax highlight code blocks
 (setq org-src-fontify-natively t)
+
+
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
@@ -233,8 +293,3 @@
 ;;
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
-
-;; Set default font faces for Org mode
-;; (add-hook 'org-mode-hook (lambda ()
-;;                             (setq buffer-face-mode-face '(:family "CMU Serif"))
-;;                             (buffer-face-mode)))
