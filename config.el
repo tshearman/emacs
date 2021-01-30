@@ -179,17 +179,7 @@
   :config
   (org-roam-mode))
 
-(require 'company-org-roam)
-    (use-package company-org-roam
-      :when (featurep! :completion company)
-      :after org-roam
-      :config
-      (set-company-backend! 'org-mode '(company-org-roam company-yasnippet company-dabbrev)))
-
 ;; Interactive Org Roam Server Graph
-(require 'simple-httpd)
-(setq httpd-root "/var/www")
-(httpd-start)
 
 ;; Interactive Org Roam Server Graph
 (use-package org-roam-server
@@ -216,7 +206,11 @@
 
 ;; automatically enable server-mode
 (after! org-roam
-  (org-roam-server-mode))
+    (org-roam-db-build-cache)
+    (require 'simple-httpd)
+    (setq httpd-root "/var/www")
+    (httpd-start)
+    (org-roam-server-mode))
 
 (use-package org-journal
   :after org-roam
