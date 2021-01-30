@@ -20,8 +20,8 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "Fira Code Light" :size 16)
-      doom-variable-pitch-font (font-spec :family "CMU Serif" :size 16))
+(setq doom-font (font-spec :family "Fira Code Light" :size 18)
+      doom-variable-pitch-font (font-spec :family "CMU Serif" :size 18))
 
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -34,14 +34,11 @@
 
 (setq org-directory "~/.doom.d/org/")
 (after! org
-  (defvar org-work-file (concat org-directory "work/work.org.gpg"))
-  (defvar org-work-inbox (concat org-directory "work/inbox.org.gpg"))
-  (defvar org-work-directory (concat org-directory "work/"))
   (defvar org-inbox-file (concat org-directory "inbox.org.gpg"))
   (defvar org-projects-file (concat org-directory "projects.org.gpg"))
   (setq org-hide-emphasis-markers t
         org-latex-hyperref-template t
-        org-agenda-files (append (file-expand-wildcards "~/.doom.d/org/*.org.gpg") (directory-files-recursively org-work-directory "\\.org.gpg$"))
+        org-agenda-files (file-expand-wildcards "~/.doom.d/org/*.org.gpg")
         org-refile-targets '(org-agenda-files)
         org-todo-keyword-faces '(("·" . "green")
                                  ("→" . "yellow")
@@ -54,13 +51,7 @@
                                 ("l" "Literature" entry (file+headline org-inbox-file "Literature ")
                                  "* ·[%^g] %i%?")
 
-                                ("w" "Work")
-                                ("wi" "Work Inbox" entry (file+headline org-work-inbox "Inbox")
-                                 "* · %i%? :work:")
-
-                                ("p" "Projects")
-                                ("pa" "Attribution" entry (file+headline "~/.doom.d/org/work/projects/attribution.org.gpg" "Tasks")
-                                 "* · %i%? :work:attribution:"))
+                                ("p" "Projects"))
         org-startup-indented 'indent
         org-startup-folded 'content
         org-src-tab-acts-natively t
@@ -68,14 +59,12 @@
         org-log-done (quote time)
         org-log-redeadline (quote time)
         org-log-reschedule (quote time)
-        org-tag-alist '(("work" . ?w)
-                        ("weekly" . ?W)
+        org-tag-alist '(("weekly" . ?W)
                         ("life" . ?l)
                         ("projects" . ?p)
                         ("literature" . ?l)
                         ("ttrpg" . ?g)
-                        ("thoughts" . ?t)
-                        ("attribution" . ?a))
+                        ("thoughts" . ?t))
         ispell-program-name "/usr/local/bin/aspell")
 
   (add-hook 'org-mode-hook 'turn-on-flyspell)
@@ -185,6 +174,38 @@
    (("C-c n i" . org-roam-insert)))
   :config
   (org-roam-mode))
+
+;; Interactive Org Roam Server Graph
+(require 'simple-httpd)
+(setq httpd-root "/var/www")
+(httpd-start)
+
+;; Interactive Org Roam Server Graph
+(use-package org-roam-server
+  :ensure t
+  :load-path "~/.org-roam-server"
+  :config
+  (setq org-roam-server-host "127.0.0.1"
+        org-roam-server-port 8080
+        org-roam-server-authenticate nil
+        org-roam-server-export-inline-images t
+        org-roam-server-serve-files nil
+        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
+        org-roam-server-network-poll t
+        org-roam-server-network-arrows nil
+        org-roam-server-network-label-truncate t
+        org-roam-server-network-label-truncate-length 60
+        org-roam-server-network-label-wrap-length 20))
+
+(defun org-roam-server-open ()
+    "Ensure the server is active, then open the roam graph."
+    (interactive)
+    (org-roam-server-mode 1)
+    (browse-url-xdg-open (format "http://localhost:%d" org-roam-server-port)))
+
+;; automatically enable server-mode
+(after! org-roam
+  (org-roam-server-mode))
 
 (use-package org-journal
   :after org-roam
