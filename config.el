@@ -48,9 +48,8 @@
                             (sequence "idea(i)" "|" "✓(d!)" "ⓧ(c@!)" "⟲(w@!)"))
         org-capture-templates '(("i" "Inbox" entry (file+headline org-inbox-file "Inbox")
                                  "* · %i%?")
-                                ("l" "Literature" entry (file+headline org-inbox-file "Literature ")
-                                 "* ·[%^g] %i%?")
-                                ("p" "Projects"))
+                                ("l" "Literature" entry (file+headline org-inbox-file "Literature")
+                                 "* ·[%^g] %i%?"))
         org-startup-indented 'indent
         org-startup-folded 'content
         org-src-tab-acts-natively t
@@ -58,13 +57,15 @@
         org-log-done (quote time)
         org-log-redeadline (quote time)
         org-log-reschedule (quote time)
+        org-superstar-headline-bullets-list '("⁖" "◉" "○" "✸" "✿")
         org-tag-alist '(("weekly" . ?W)
                         ("life" . ?l)
                         ("projects" . ?p)
                         ("literature" . ?l)
                         ("ttrpg" . ?g)
                         ("thoughts" . ?t))
-        ispell-program-name "/usr/local/bin/aspell")
+        ispell-program-name "/usr/local/bin/aspell"
+        org-archive-location "%s_archive.gpg::")
 
   (add-hook 'org-mode-hook 'turn-on-flyspell)
   (add-hook 'org-mode-hook 'org-indent-mode)
