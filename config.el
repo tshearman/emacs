@@ -50,7 +50,6 @@
                                  "* · %i%?")
                                 ("l" "Literature" entry (file+headline org-inbox-file "Literature ")
                                  "* ·[%^g] %i%?")
-
                                 ("p" "Projects"))
         org-startup-indented 'indent
         org-startup-folded 'content
@@ -151,16 +150,21 @@
   :init
   (setq org-roam-encrypt-files t
         org-roam-directory (concat org-directory "roam/")
+        org-roam-dailies-directory (concat org-directory "dailies/")
         org-roam-index-file (concat org-roam-directory "index.org.gpg")
         org-roam-capture-templates '(("d" "default" plain (function org-roam-capture--get-point)
                                       "%?"
                                       :file-name "%<%Y%m%d%H%M%S>-${slug}"
-                                      :head "#+title: ${title}\n"
+                                      :head "#+TITLE: ${title}\n#+ROAM_ALIAS: \n#+ROAM_TAGS: \n"
                                       :unnarrowed t)
                                      ("l" "latex" plain (function org-roam-capture--get-point)
                                       "\n- tags :: %?\n\n\n\n\nbibliographystyle:humannat\nbibliography:../../references/bazaar"
                                       :file-name "%<%Y%m%d%H%M%S>-${slug}"
-                                      :head "#+title: ${title}\n")))
+                                      :head "#+TITLE: ${title}\n#+ROAM_ALIAS: \n#+ROAM_TAGS: \n"))
+        org-roam-dailies-capture-templates '(("d" "default" entry #'org-roam-capture--get-point
+                                              "* %?"
+                                              :file-name "dailies/%<%Y-%m-%d>"
+                                              :head "#+TITLE: %<%Y-%m-%d>\n\n")))
   :hook
   (after-init . org-roam-mode)
   :bind
@@ -174,6 +178,13 @@
    (("C-c n i" . org-roam-insert)))
   :config
   (org-roam-mode))
+
+(require 'company-org-roam)
+    (use-package company-org-roam
+      :when (featurep! :completion company)
+      :after org-roam
+      :config
+      (set-company-backend! 'org-mode '(company-org-roam company-yasnippet company-dabbrev)))
 
 ;; Interactive Org Roam Server Graph
 (require 'simple-httpd)
