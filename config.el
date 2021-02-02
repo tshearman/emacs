@@ -3,7 +3,6 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
-
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Toby Shearman"
@@ -23,12 +22,11 @@
 (setq doom-font (font-spec :family "Fira Code Light" :size 18)
       doom-variable-pitch-font (font-spec :family "CMU Serif" :size 18))
 
-
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-gruvbox)
-
+;;(setq doom-theme 'doom-gruvbox)
+(setq doom-theme 'spacemacs-light)
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 
@@ -36,20 +34,25 @@
 (after! org
   (defvar org-inbox-file (concat org-directory "inbox.org.gpg"))
   (defvar org-projects-file (concat org-directory "projects.org.gpg"))
-  (setq org-hide-emphasis-markers t
+  (setq org-refile-allow-creating-parent-nodes t
+        org-hide-emphasis-markers t
         org-latex-hyperref-template t
         org-agenda-files (file-expand-wildcards "~/.doom.d/org/*.org.gpg")
         org-refile-targets '(org-agenda-files)
-        org-todo-keyword-faces '(("·" . "green")
-                                 ("→" . "yellow")
-                                 ("⟲" . "yellow")
-                                 ("ⓧ" . (:foreground "blue" :weight bold)))
-        org-todo-keywords '((sequence "·(t!)" "→(s!)" "|" "✓(d!)" "/(c@!)" "⟲(w@!)")
-                            (sequence "idea(i)" "|" "✓(d!)" "ⓧ(c@!)" "⟲(w@!)"))
+        org-todo-keyword-faces '(("◦" . "yellow")
+                                 ("→" . "green")
+                                 ("⟲" . "blue")
+                                 ("✗" . (:foreground "red" :weight bold)))
+        org-todo-keywords '((sequence "◦(t!)" "→(s!)" "|" "✔(d!)" "✗(c@!)" "⟲(w@!)")
+                            (sequence "❀(i)" "|" "✔(d!)" "✗(c@!)" "⟲(w@!)"))
         org-capture-templates '(("i" "Inbox" entry (file+headline org-inbox-file "Inbox")
-                                 "* · %i%?")
+                                 "* ◦ %i%?")
+                                ("!" "Idea" entry (file+headline org-inbox-file "Ideas!")
+                                 "* ❀ %i%?")
                                 ("l" "Literature" entry (file+headline org-inbox-file "Literature")
-                                 "* ·[%^g] %i%?"))
+                                 "* ◦[%^g] %i%?")
+                                ("p" "Project" entry (file_headline org-projects-file "Inbox")
+                                 "* %i%?"))
         org-startup-indented 'indent
         org-startup-folded 'content
         org-src-tab-acts-natively t
@@ -57,14 +60,14 @@
         org-log-done (quote time)
         org-log-redeadline (quote time)
         org-log-reschedule (quote time)
-        org-superstar-headline-bullets-list '("⁖" "◉" "○" "✸" "✿")
+        org-superstar-headline-bullets-list '("◉" "⁖" "⁖" "⁖" "⁖" "⁖")
         org-tag-alist '(("weekly" . ?W)
                         ("life" . ?l)
                         ("projects" . ?p)
                         ("literature" . ?l)
                         ("ttrpg" . ?g)
                         ("thoughts" . ?t))
-        ispell-program-name "/usr/local/bin/aspell"
+        ispell-program-name "/usr/bin/aspell"
         org-archive-location "%s_archive.gpg::")
 
   (add-hook 'org-mode-hook 'turn-on-flyspell)
@@ -72,6 +75,7 @@
   (add-hook 'org-mode-hook 'turn-off-auto-fill)
   (add-hook 'org-mode-hook 'org-indent-mode)
   (add-hook 'org-mode-hook 'visual-line-mode)
+  (add-hook 'org-mode-hook 'variable-pitch-mode)
   (global-set-key (kbd "C-c a") 'org-agenda)
   (global-set-key (kbd "C-c x") 'org-capture))
 
@@ -95,10 +99,10 @@
                      (org-agenda-start-on-weekday 0)
                      (org-agenda-start-with-log-mode '(closed))
                      (org-agenda-skip-function
-                      '(org-agenda-skip-entry-if 'notregexp "^\\*\\* ✓ "))))
+                      '(org-agenda-skip-entry-if 'notregexp "^\\*\\* ✔ "))))
           ("v" "View"
            ((agenda ""
-                    ((org-agenda-overriding-header "\nAgenda ====================")
+                    ((org-agenda-overriding-header "\n\nAgenda ====================")
                      (org-agenda-start-day "today")
                      (org-agenda-span 1)
                      (org-super-agenda-groups
@@ -236,6 +240,16 @@
       (deft-extensions '("org" "org.gpg" "gpg"))
       (deft-directory (concat org-directory "roam")))
 
+(defun my/org-open-new-window (path)
+  "Open info in a new buffer"
+  (setq available-windows
+        (delete (selected-window) (window-list)))
+  (setq new-window
+         (or (car available-windows)
+             (split-window-right)))
+  (select-window new-window)
+  (org-open-file path))
+
 (defun my/org-ref-open-pdf-at-point ()
   "Open the pdf for bibtex key under point if it exists."
   (interactive)
@@ -243,7 +257,7 @@
          (key (car results))
 	 (pdf-file (car (bibtex-completion-find-pdf key))))
     (if (file-exists-p pdf-file)
-	(org-open-file pdf-file)
+        (my/org-open-new-window pdf-file)
       (message "No PDF found for %s" key))))
 
 (use-package reftex
@@ -299,11 +313,6 @@
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
 
-;;syntax highlight code blocks
-(setq org-src-fontify-natively t)
-
-
-
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
@@ -320,3 +329,206 @@
 ;;
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
+
+ ;; Variables
+(setq
+ bg-white           "#fbf8ef"
+ bg-light           "#222425"
+ bg-dark            "#1c1e1f"
+ bg-darker          "#1c1c1c"
+ fg-white           "#ffffff"
+ shade-white        "#efeae9"
+ fg-light           "#655370"
+ dark-cyan          "#008b8b"
+ region-dark        "#2d2e2e"
+ region             "#39393d"
+ slate              "#8FA1B3"
+ keyword            "#f92672"
+ comment            "#525254"
+ builtin            "#fd971f"
+ purple             "#9c91e4"
+ doc                "#727280"
+ type               "#66d9ef"
+ string             "#b6e63e"
+ gray-dark          "#999"
+ gray               "#bbb"
+ sans-font          "Fira Code Light"
+ serif-font         "Fira Code Light"
+ et-font            "CMU Serif"
+ sans-mono-font     "Fira Code Light"
+ serif-mono-font    "Fira Code Light")
+
+;; ;; Settings
+;; ;;(custom-theme-set-faces
+(use-package doom-themes
+  :custom-face
+  (org-level-1 ((t (:family ,et-font
+                    :height 1.6
+                    :weight normal
+                    :slant normal
+                    :foreground ,bg-dark))))
+  (org-level-2 ((t (:family ,et-font
+                    :height 1.3
+                    :weight normal
+                    :slant normal
+                    :foreground ,bg-dark))))
+  (org-level-3 ((t (:family ,et-font
+                    :weight normal
+                    :slant italic
+                    :height 1.2
+                    :foreground ,bg-dark))))
+  (org-level-4 ((t (:family ,et-font
+                    :weight normal
+                    :slant italic
+                    :height 1.1
+                    :foreground ,bg-dark))))
+  (org-level-5 ((t (:family ,et-font
+                    :weight bold
+                    :height 1.1
+                    :foreground ,slate))))
+  (org-level-6 ((t (:family ,et-font
+                    :weight bold
+                    :height 1.1
+                    :foreground ,slate))))
+  (org-level-7 ((t (:family ,et-font
+                    :weight bold
+                    :height 1.1
+                    :foreground ,slate))))
+  (org-level-8 ((t (:family ,et-font
+                    :weight bold
+                    :height 1.1
+                    :foreground ,slate))))
+  (header-line ((t (:family ,et-font
+                    :background nil))))
+  (org-document-title ((t (:family ,et-font
+                           :height 1.8
+                           :foreground ,bg-dark
+                           :underline nil))))
+  (org-document-info ((t (:family ,et-font
+                          :foreground ,gray
+                          :slant italic
+                          :height 1.2))))
+  (org-headline-done ((t (:family ,et-font
+                          :foreground ,gray
+                          :strike-through t))))
+  (org-quote ((t (:family ,et-font))))
+  (org-block ((t (:family ,et-font
+                  :background nil
+                  :foreground: ,bg-dark))))
+  (org-block-begin-line ((t (:family ,sans-mono-font
+                             :height 0.8
+                             :foreground ,slate))))
+  (org-block-end-line ((t (:family ,sans-mono-font
+                           :height 0.8
+                           :foreground ,slate
+                           :background nil))))
+
+  (org-document-info-keyword ((t (:family ,et-font
+                                  :foreground ,comment
+                                  :height 0.8))))
+  (org-link ((t (:family ,et-font
+                 :underline nil
+                 :weight normal
+                 :foreground ,bg-dark))))
+  (org-special-keyword ((t (:height 0.8
+                            :foreground ,comment
+                            :family ,sans-mono-font))))
+  (org-todo ((t (:family ,et-font
+                 :foreground ,builtin))))
+  (org-done ((t (:foreground ,dark-cyan,
+                 :family ,et-font))))
+  (org-agenda-current-time ((t (:family ,et-font
+                                :foreground ,slate))))
+  (org-hide ((t (:family ,et-font
+                 :foreground ,bg-white))))
+  (org-time-grid ((t (:family ,et-font
+                      :foreground ,comment))))
+  (org-warning ((t (:family ,et-font
+                    :foreground ,builtin))))
+  (org-date ((t (:family ,sans-mono-font
+                 :height 0.8))))
+  (org-agenda-structure ((t (:family ,et-font
+                             :height 1.3
+                             :foreground ,doc
+                             :weight normal))))
+  (org-agenda-date ((t (:family ,et-font
+                        :foreground ,doc
+                        :height 1.1))))
+  (org-agenda-date-today ((t (:family ,et-font
+                              :foreground ,keyword
+                              :height 1.5))))
+  (org-scheduled ((t (:family ,et-font
+                      :foreground ,gray))))
+  (org-deadline ((t (:family ,et-font))))
+  (org-upcoming-deadline ((t (:family ,et-font
+                              :foreground ,keyword))))
+  (org-schedule-today ((t (:family ,et-font
+                           :foreground ,slate))))
+  (org-scheduled-previously ((t (:family ,et-font
+                                 :foreground ,slate))))
+  (org-agenda-done ((t (:family ,et-font
+                        :foreground ,doc
+                        :strike-through t))))
+  (org-ellipsis ((t (:family ,et-font
+                     :foreground ,comment))))
+  (org-tag ((t (:family ,sans-mono-font
+                :foreground ,doc))))
+  (org-table ((t (:family ,serif-mono-font
+                  :background ,bg-white
+                  :height 0.9))))
+  (org-code ((t (:family ,serif-mono-font
+                 :foreground ,comment
+                 :height 0.9))))
+  )
+
+;;    (dired-subtree-depth-1-face
+;;    (:background nil)
+;;    nil)
+;;    (dired-subtree-depth-2-face
+;;    (:background nil)
+;;    nil)
+;;    (dired-subtree-depth-3-face
+;;    (:background nil)
+;;    nil)
+;;    (dired-subtree-depth-4-face
+;;    (:background nil)
+;;    nil)
+;;    (dired-subtree-depth-5-face
+;;    (:background nil)
+;;    nil)
+;;    (dired-subtree-depth-6-face
+;;    (:background nil)
+;;    nil)
+;;    (nlinum-current-line
+;;    (:foreground ,builtin)
+;;    (:foreground ,bg-dark))
+;;    (vertical-border
+;;    (:background ,region
+;;                 :foreground ,region)
+;;    nil)
+;;    (which-key-command-description-face
+;;    (:foreground ,type)
+;;    nil)
+;;    (flycheck-error
+;;    (:background nil)
+;;    nil)
+;;    (flycheck-warning
+;;    (:background nil)
+;;    nil)
+;;    (font-lock-string-face
+;;    (:foreground ,string)
+;;    nil)
+;;    (font-lock-comment-face
+;;    (:foreground ,doc
+;;                 :slant italic)
+;;    (:background nil
+;;                 :foreground ,doc
+;;                 :slant italic))
+;;    (region
+;;    (:background ,region)
+;;    nil)
+;;    (header-line
+;;    (:background nil
+;;                 :inherit nil)
+;;    (:background nil
+;;                 :inherit nil)))
