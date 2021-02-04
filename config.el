@@ -37,6 +37,7 @@
   (setq org-refile-allow-creating-parent-nodes t
         org-hide-emphasis-markers t
         org-latex-hyperref-template t
+        org-image-actual-width 600
         org-agenda-files (file-expand-wildcards "~/.doom.d/org/*.org.gpg")
         org-refile-targets '(org-agenda-files)
         org-todo-keywords '((sequence "◦(t!)" "→(s!)" "⟲(w@!)" "|" "✓(d!)" "✗(c@!)")
@@ -47,10 +48,11 @@
                                  "* ❀ %i%?")
                                 ("l" "Literature" entry (file+headline org-inbox-file "Literature")
                                  "* ◦[%^g] %i%?")
-                                ("p" "Project" entry (file_headline org-projects-file "Inbox")
+                                ("p" "Project" entry (file+headline org-projects-file "Inbox")
                                  "* %i%?"))
         org-startup-indented 'indent
-        org-startup-folded 'content
+        org-startup-folded nil;'content
+        org-startup-with-inline-images t
         org-src-tab-acts-natively t
         org-enforce-todo-dependencies t
         org-log-done (quote time)
@@ -69,6 +71,8 @@
                         ("thoughts" . ?t))
         org-archive-location "%s_archive.gpg::")
 
+  (require 'org-download)
+  (add-hook 'dired-mode-hook 'org-download-enable)
   (add-hook 'org-mode-hook 'org-indent-mode)
   (add-hook 'org-mode-hook 'turn-off-auto-fill)
   (add-hook 'org-mode-hook 'org-indent-mode)
@@ -115,7 +119,7 @@
                      ((org-agenda-overriding-header "\n\nProjects ________________________________ ")
                       (org-super-agenda-groups
                        '((:name "Projects"
-                          :tag "project"
+                          :tag "projects"
                           :order 14)
                          (:name "Research"
                           :tag "research"
@@ -131,6 +135,7 @@
   :after org-super-agenda
   :init
   (setq org-roam-encrypt-files t
+        org-roam-db-update-method 'immediate
         org-roam-directory (concat org-directory "roam/")
         org-roam-dailies-directory (concat org-directory "dailies/")
         org-roam-index-file (concat org-roam-directory "index.org.gpg")
@@ -147,6 +152,7 @@
                                               "* %?"
                                               :file-name "dailies/%<%Y-%m-%d>"
                                               :head "#+TITLE: %<%Y-%m-%d>\n\n")))
+
   :hook
   (after-init . org-roam-mode)
   :bind
@@ -186,9 +192,15 @@
     (org-roam-server-mode 1)
     (browse-url-xdg-open (format "http://localhost:%d" org-roam-server-port)))
 
+(defun my/org-roam-db-clear ()
+  (interactive)
+  (org-roam-db-clear)
+  (org-roam-db-build-cache))
+
+(global-set-key (kbd "C-c C-r") 'my/org-roam-db-clear)
+
 ;; automatically enable server-mode
 (after! org-roam
-    (org-roam-db-build-cache)
     (require 'simple-httpd)
     (setq httpd-root "/var/www")
     (httpd-start)
@@ -290,6 +302,8 @@
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
+
+(require 'transpose-frame)
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
