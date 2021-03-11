@@ -1,0 +1,20 @@
+#+title: Welcome to Doskval
+#+roam_tags: BitD
+
+* Players
+- [[file:20210220115632-hamish_vandorn.org.gpg][Hamish Vandorn]]
+- [[file:20210220115710-duncan_cooper.org.gpg][Duncan Cooper]]
+
+* NPCs
+- [[file:20210220124256-darmit.org.gpg][Darmit]]
+- [[file:20210220124437-petra.org.gpg][Petra]]
+- [[file:20210220124833-w_d_levine.org.gpg][W D Levine]]
+- [[file:20210220125355-merilla.org.gpg][Merilla]]
+
+* Campaign Notes
+** Session 1
+*** Free Play
+
+*** The Score
+
+*** Downtime

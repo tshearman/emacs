@@ -176,6 +176,7 @@
   :config
   (setq org-roam-server-host "127.0.0.1"
         org-roam-server-port 8080
+        org-roam-server-network-arrows (json-encode (list (cons 'to (list (cons 'type "arrow")))))
         org-roam-server-authenticate nil
         org-roam-server-export-inline-images t
         org-roam-server-serve-files nil
